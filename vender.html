@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <div id="cadanuncio">
+        <h3>{{titulo}}</h3>
+        <form action="cadanuncio" method="post">
+            <p>Título:</p> 
+            <input type="text" name="titulo" id="titulo"><br>
+            <p>Descrição:</p>
+            <input type="text" name="descr" id="descricao"><br>
+            <p>Quantidade:</p>
+            <input type="test" name="qtde" id="qtde"><br>
+            <p>Valor:</p>
+            <input type="text" name="valor" id="valor"><br>
+            <p>Oferta (S ou N):</p>
+            <input type="text" name="oferta" id="oferta"><br>
+            <p>Escolha o Número ID da categoria conforme tabela abaixo</p>
+            <input type="text" name="categoria_id" id="categoria_id">
+            <table border="1">
+                {% for categoria in categorias %}
+                    <tr>
+                        <td>{{ categoria.id }}</td>
+                        <td>{{ categoria.descricao }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <p>Digite seu ID (Esta opção ficará automática após autenticação)</p>
+                <input type="text" name="usuario_id" id="usuario_id">
+            <br>
+            <br>
+            <input type="submit" value="Cadastrar">
+            <br>
+        </form>   
+    </div>
+    <br>
+    <br>
+    <h2>Anúncios publicados</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Título</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Quantidade</th>
+                <th>Oferta</th>
+                <th>Editar</th>
+                <th>Deletar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for anuncio in anuncios %}
+                <tr>
+                    <td>{{ anuncio.id }}</td>
+                    <td>{{ anuncio.titulo }}</td>
+                    <td>{{ anuncio.descricao }}</td>
+                    <td>{{ anuncio.valor }}</td>
+                    <td>{{ anuncio.qtde }}</td>
+                    <td>{{ anuncio.oferta }}</td>
+                    <td><a href={{ url_for("editaranuncio",id=anuncio.id) }}>Editar</a></td>
+                    <td><a href={{ url_for("deletaranuncio",id=anuncio.id) }}>Deletar</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+<footer>
+    <div>
+        <br>
+        <p>Copyright © 2023</p>
+    </div>
+</footer>
+</html>

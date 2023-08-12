@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <div>
+        <form action="/anuncio/editar/{{anuncio.id}}" method="post">
+            <p><label for="titulo">Título</label>
+            <input type="text" id="titulo" name="titulo" value="{{anuncio.titulo}}"></p>
+            <p><label for="descricao">Descrição</label>
+                <input type="text" id="descricao" name="descricao" value="{{anuncio.descricao}}"></p>
+            <p><label for="valor">Valor</label>
+            <input type="text" id="valor" name="valor" value="{{anuncio.valor}}"></p>
+            <p><label for="qtde">Quantidade</label>
+            <input type="text" id="qtde" name="qtde" value="{{anuncio.qtde}}"></p>
+            <p><label for="oferta">Oferta (sim ou não)</label>
+            <input type="text" id="oferta" name="oferta" value="{{anuncio.oferta}}"></p>
+            <p><label for="categoria">Número ID da Categoria</label>
+            <input type="text" id="categoria" name="categoria" value="{{anuncio.categoria}}"></p>    
+            <p><input type="submit" value="Alterar"></p>
+        </form>
+        <a href={{url_for("anuncio")}}> Cancelar</a>
+    </div>
+    <br>
+    <br>
+    <br> 
+</body>
+</html>

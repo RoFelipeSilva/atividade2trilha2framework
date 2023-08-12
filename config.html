@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <div>
+        <h2>O que você quer fazer?</h2>
+        <div id="escolha">
+            <ul id="atalhos">
+                <li><a href={{url_for("meuperfil")}}>Visualizar/Configurar meu perfil </a></li>  
+                <li><a href={{url_for("categorias")}}>Configurar Categorias</a></li> 
+            </ul>
+        </div>
+        <br>
+    </div>  
+</body>
+<footer>
+    <div>
+        <p>Copyright © 2023</p>
+    </div>
+</footer>
+</html>

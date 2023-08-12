@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <div id="cadusuario">
+        <h3>{{titulo}}</h3>
+        <form action="/usuario/criar" method="post">
+            <p>Nome:</p> 
+            <input type="text" name="nome" id="nome"><br>
+            <p>Email:</p>
+            <input type="text" name="email" id="email"><br>
+            <p>CPF:</p>
+            <input type="text" name="cpf" id="cpf"><br>
+            <p>Endereço:</p>
+            <input type="text" name="endereco" id="end"><br>
+            <p>Senha:</p>
+            <input type="test" name="senha" id="senha"><br>
+            <br>
+            <br>
+            <input type="submit" value="Cadastrar">
+            <br>
+        </form>   
+    </div>
+    <div>
+        <h4>Lista de {{titulo}}</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>CPF</th>
+                <th>Endereço</th>
+                <th>Senha</th>
+                <th>Editar</th>
+                <th>Deletar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.nome }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>{{ usuario.cpf }}</td>
+                    <td>{{ usuario.end }}</td>
+                    <td>{{ usuario.senha }}</td>
+                    <td><a href={{ url_for("editarusuario",id=usuario.id) }}>Editar?</a></td>
+                    <td><a href={{ url_for("deletarusuario",id=usuario.id) }}>Deletar?</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</body>
+<footer>
+    <div>
+        <p>Copyright © 2023</p>
+    </div>
+</footer>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <div id="cadcategorias">
+        <form action="cadcategorias" method="post">
+            <p>Digite a categoria</p> 
+            <input type="text" name="categoria" id="categoria"><br>
+            <br>
+            <br>
+            <input type="submit" value="Cadastrar">
+            <br>
+        </form>   
+    </div>  3
+    <h4>Lista de {{titulo}}</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Categoria</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for categoria in categorias %}
+                <tr>
+                    <td>{{ categoria.id }}</td>
+                    <td>{{ categoria.descricao }}</td>
+                    <td><a href={{ url_for("editarcategoria",id=categoria.id) }}>Editar?</a></td>
+                    <td><a href={{ url_for("deletarcategoria",id=categoria.id) }}>Deletar?</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+<footer>
+    <div>
+        <p>Copyright © 2023</p>
+    </div>
+</footer>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <h1>{{titulo}}</h1>
+    <br>
+    <br>
+    <h2>As melhores ofertas e promoções estão aqui!</h2>
+    <br>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Título</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Quantidade</th>
+                <th>Oferta</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for anuncio in anuncios %}
+                <tr>
+                    <td>{{ anuncio.id }}</td>
+                    <td>{{ anuncio.titulo }}</td>
+                    <td>{{ anuncio.descricao }}</td>
+                    <td>{{ anuncio.valor }}</td>
+                    <td>{{ anuncio.qtde }}</td>
+                    <td>{{ anuncio.oferta }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>  
+</body>
+<footer>
+    <div>
+        <p>Copyright © 2023</p>
+    </div>
+</footer>
+</html>

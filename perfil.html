@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <div>
+        <form action="/usuario/editar/{{usuario.id}}" method="post">
+            <p><label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" value="{{usuario.nome}}"></p>
+            <p><label for="email">E-mail</label>
+            <input type="text" id="email" name="email" value="{{usuario.email}}"></p>       
+            <p><label for="senha">Senha</label>
+            <input type="text" id="senha" name="senha" value="{{usuario.senha}}"></p>
+            <p><label for="end">Endereço</label>
+            <input type="text" id="end" name="end" value="{{usuario.end}}"></p>
+            <p><input type="submit" value="Alterar"></p>
+        </form>
+        <a href={{url_for("usuario")}}> Cancelar</a>
+    </div>
+    <br>
+    <br>
+    <div> (A partir deste ponto serão mostrados os anúncios FAVORITOS do usuário. Abaixo, exemplos.)
+        <table border="1">
+            <tr>
+                <td>Conjunto de copos americano 12 unidades</td>
+                <td>R$ 35,00</td>
+                <td>Bazar</td>
+            </tr>
+            <tr>
+                <td>Refrigerador Electrolux duplex 473 litros bca</td>
+                <td>R$ 1.800,00</td>
+                <td>Eletrodomestico</td>
+            </tr>
+    </div> 
+    <br>
+    <br> 
+</body>
+</html>

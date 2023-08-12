@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head> 
+    <title>PEG PAG - {{titulo}}</title>
+    <div id="home">
+        <a href={{url_for("index")}}>Página Inicial</a>
+    </div>
+</head>
+<body>
+    <div id="fale">
+        <h3>{{titulo}}</h3>
+        <form action="caduser" method="post">
+            <p>Seu nome:</p> 
+            <input type="text" name="nome"><br>
+            <p>Seu Email:</p>
+            <input type="text" name="email"><br>
+            <p>Sua Mensagem:</p>
+            <textarea type="text" name="mensagem"></textarea><br>
+            <br>
+            <br>
+            <input type="submit" value="Enviar mensagem">
+        </form>   
+        <br>
+        <h4>Entre em contato conosco pelo telefone/Whatsapp:</h4>
+        <h4>+55 18 2101-0000</h4>
+    </div>  
+</body>
+<footer>
+    <div>
+        <p>Copyright © 2023</p>
+    </div>
+</footer>
+</html>
