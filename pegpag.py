@@ -1,304 +1,209 @@
-from flask import Flask, make_response
-from markupsafe import escape
-from flask import render_template
-from flask import request
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from flask import url_for
-from flask import redirect
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:9577@localhost:3306/mydb'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = "pegpag-crud"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:@localhost:3306/mydb"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
 class Usuario(db.Model):
     __tablename__ = "usuarios"
-    id = db.Column('id_Usuario', db.Integer, primary_key=True)
-    nome = db.Column('Us_Nome', db.String(100))
-    email = db.Column('Us_Email', db.String(100))
-    cpf = db.Column('Us_CPF', db.Integer)
-    end = db.Column('Us_End', db.String(150))
-    senha = db.Column('Us_Senha', db.String(10))
-
-    def __init__(self, nome, email, cpf, end, senha):
-        self.nome = nome
-        self.email = email
-        self.cpf = cpf
-        self.end = end
-        self.senha = senha
+    id = db.Column("id_Usuario", db.Integer, primary_key=True)
+    nome = db.Column("Us_Nome", db.String(100), nullable=False)
+    email = db.Column("Us_Email", db.String(100), nullable=False)
+    cpf = db.Column("Us_CPF", db.String(20))
+    end = db.Column("Us_End", db.String(150))
+    senha = db.Column("Us_Senha", db.String(100), nullable=False)
 
 class Categoria(db.Model):
     __tablename__ = "categoria"
-    id = db.Column('id_categoria', db.Integer, primary_key=True)
-    descricao = db.Column('cat_descricao', db.String(45))
-    
-    def __init__ (self, descricao):
-        self.descricao = descricao
+    id = db.Column("id_categoria", db.Integer, primary_key=True)
+    descricao = db.Column("cat_descricao", db.String(45), nullable=False)
 
 class Anuncio(db.Model):
     __tablename__ = "anuncio"
-    id = db.Column('id_anuncio', db.Integer, primary_key=True)
-    titulo = db.Column('anu_titulo', db.String(35))
-    descricao = db.Column('anu_descricao', db.String(250))
-    valor = db.Column('anu_valor', db.Float)
-    qtde = db.Column('anu_qtde', db.Integer)
-    oferta = db.Column('anu_oferta', db.String(3))
-    categoria_id = db.Column('id_categoria',db.Integer, db.ForeignKey("categoria.id_categoria"))
-    usuario_id = db.Column('id_Usuario',db.Integer, db.ForeignKey("usuarios.id_Usuario"))
-
-    def __init__(self, titulo, descricao, valor, qtde, oferta, categoria_id, usuario_id):
-        self.titulo = titulo
-        self.descricao = descricao
-        self.valor = valor
-        self.qtde = qtde
-        self.oferta = oferta
-        self.categoria_id = categoria_id
-        self.usuario_id = usuario_id
+    id = db.Column("id_anuncio", db.Integer, primary_key=True)
+    titulo = db.Column("anu_titulo", db.String(35), nullable=False)
+    descricao = db.Column("anu_descricao", db.String(250))
+    valor = db.Column("anu_valor", db.Float, nullable=False)
+    qtde = db.Column("anu_qtde", db.Integer, nullable=False)
+    oferta = db.Column("anu_oferta", db.String(3))
+    categoria_id = db.Column("id_categoria", db.Integer, db.ForeignKey("categoria.id_categoria"))
+    usuario_id = db.Column("id_Usuario", db.Integer, db.ForeignKey("usuarios.id_Usuario"))
 
 class Favorito(db.Model):
     __tablename__ = "favorito"
-    id = db.Column('id_favorito', db.Integer, primary_key=True)
-    categoria_id = db.Column('id_anuncio',db.Integer, db.ForeignKey("categoria.id_anuncio"))
-    usuario_id = db.Column('id_Usuario',db.Integer, db.ForeignKey("usuarios.id_Usuario"))
+    id = db.Column("id_favorito", db.Integer, primary_key=True)
+    anuncio_id = db.Column("id_anuncio", db.Integer, db.ForeignKey("anuncio.id_anuncio"), nullable=False)
+    usuario_id = db.Column("id_Usuario", db.Integer, db.ForeignKey("usuarios.id_Usuario"), nullable=False)
 
 class Pergunta(db.Model):
-    __tablename_= "pergunta"
-    id = db.Column('id_pergunta', db.Integer, primary_key=True)
-    per_pergunta = db.Column('Per_Pergunta', db.String(350))
-    per_resposta = db.Column('Per_Resposta', db.String(350))
-    categoria_id = db.Column('id_anuncio',db.Integer, db.ForeignKey("anuncio.id_anuncio"))
-    usuario_id = db.Column('id_Usuario',db.Integer, db.ForeignKey("usuarios.id_Usuario"))
-
-    def __init__(self, pergunta, resposta, id_anuncio, id_usuario):
-        self.pergunta = pergunta
-        self.resposta = resposta
-        self.anuncio_id = id_anuncio
-        self.usuario_id = id_usuario
+    __tablename__ = "pergunta"
+    id = db.Column("id_pergunta", db.Integer, primary_key=True)
+    pergunta = db.Column("Per_Pergunta", db.String(350), nullable=False)
+    resposta = db.Column("Per_Resposta", db.String(350))
+    anuncio_id = db.Column("id_anuncio", db.Integer, db.ForeignKey("anuncio.id_anuncio"))
+    usuario_id = db.Column("id_Usuario", db.Integer, db.ForeignKey("usuarios.id_Usuario"))
 
 class Compra(db.Model):
     __tablename__ = "compra"
-    id = db.Column('id_compra', db.Integer, primary_key=True)
-    qtde = db.Column('com_qtde', db.Integer)
-    valor = db.Column('com_valor', db.Float)
-    total = db.Column('com_total', db.Float)
-    anuncio_id = db.Column('anuncio_id_anuncio',db.Integer, db.ForeignKey("anuncio.id_anuncio"))
-    usuario_id = db.Column('id_Usuario',db.Integer, db.ForeignKey("usuarios.id_Usuario"))
-
-    def __init__(self, qtde, valor, total, anuncio_id, usuario_id):
-        self.qtde = qtde
-        self.valor = valor
-        self.total = total
-        self.anuncio_id = anuncio_id
-        self.usuario_id = usuario_id
+    id = db.Column("id_compra", db.Integer, primary_key=True)
+    qtde = db.Column("com_qtde", db.Integer, nullable=False)
+    valor = db.Column("com_valor", db.Float, nullable=False)
+    total = db.Column("com_total", db.Float, nullable=False)
+    anuncio_id = db.Column("anuncio_id_anuncio", db.Integer, db.ForeignKey("anuncio.id_anuncio"))
+    usuario_id = db.Column("id_Usuario", db.Integer, db.ForeignKey("usuarios.id_Usuario"))
 
 @app.errorhandler(404)
-def paginanaoencontrada(error):
-    return render_template('pagnaoencontrada.html', titulo = "Página não encontrada")
-        
+def pagina_nao_encontrada(error):
+    return render_template("pagnaoencontrada.html", titulo="Página não encontrada"), 404
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# USUARIOS
 @app.route("/usuario")
 def usuario():
-    return render_template('usuario.html', usuarios = Usuario.query.all(), 
-    titulo="Cadastro de Usuario")
+    return render_template("usuario.html", usuarios=Usuario.query.order_by(Usuario.id.desc()).all(), titulo="Cadastro de Usuario")
 
-@app.route("/usuario/meuperfil")
-def meuperfil():
-    return render_template('meuperfil.html', título="Meu perfil ")
-
-@app.route("/usuario/criar", methods=['POST'])
+@app.post("/usuario/criar")
 def criarusuario():
-    usuario = Usuario(request.form.get('nome'), request.form.get('email'), 
-    request.form.get('cpf'), request.form.get('end'), request.form.get('senha'))
-    db.session.add(usuario)
-    db.session.commit()
-    return redirect(url_for('usuario'))
+    obj = Usuario(nome=request.form.get("nome"), email=request.form.get("email"), cpf=request.form.get("cpf"), end=request.form.get("end"), senha=request.form.get("senha"))
+    db.session.add(obj); db.session.commit(); flash("Usuário cadastrado com sucesso.")
+    return redirect(url_for("usuario"))
+
+@app.route("/usuario/editar/<int:id>", methods=["GET","POST"])
+def editarusuario(id):
+    obj = Usuario.query.get_or_404(id)
+    if request.method == "POST":
+        obj.nome=request.form.get("nome"); obj.email=request.form.get("email"); obj.cpf=request.form.get("cpf"); obj.end=request.form.get("end"); obj.senha=request.form.get("senha")
+        db.session.commit(); flash("Usuário alterado com sucesso."); return redirect(url_for("usuario"))
+    return render_template("perfil.html", usuario=obj, titulo="Alterar usuário")
+
+@app.post("/usuario/deletar/<int:id>")
+def deletarusuario(id):
+    db.session.delete(Usuario.query.get_or_404(id)); db.session.commit(); flash("Usuário excluído com sucesso.")
+    return redirect(url_for("usuario"))
 
 @app.route("/usuario/detalhar/<int:id>")
 def buscarusuario(id):
-    usuario = Usuario.query.get(id)
-    return usuario.nome
+    obj=Usuario.query.get_or_404(id)
+    return render_template("crud_detalhe.html", titulo="Detalhar usuário", entidade="Usuário", campos=[("ID",obj.id),("Nome",obj.nome),("E-mail",obj.email),("CPF",obj.cpf),("Endereço",obj.end)])
 
-@app.route("/usuario/editar/<int:id>", methods=['GET','POST'])
-def editarusuario(id):
-    usuario = Usuario.query.get(id)
-    if request.method == 'POST':
-        usuario.nome = request.form.get('nome')
-        usuario.email = request.form.get('email')
-        usuario.cpf = request.form.get('cpf')
-        usuario.end = request.form.get('end')
-        usuario.senha = request.form.get('senha')
-        db.session.add(usuario)
-        db.session.commit()
-        return redirect(url_for('usuario'))
-
-    return render_template('perfil.html', usuario = usuario, titulo="Alterar")
-
-@app.route("/usuario/deletar/<int:id>")
-def deletarusuario(id):
-    usuario = Usuario.query.get(id)
-    db.session.delete(usuario)
-    db.session.commit()
-    return redirect(url_for('usuario'))
-
-@app.route("/cad/perfil")
-def perfil():
-    return render_template('perfil.html')
-
-# - - - - - - A N Ú N C I O S - - - - - - 
-
-@app.route("/anuncio")
-def anuncio():
-    return render_template('anuncio.html', anuncios = Anuncio.query.all(), 
-    categorias = Categoria.query.all(), titulo="Anuncio")
-
-@app.route("/anuncio/comprar")
-def comprar():
-    return render_template('comprar.html', anuncios = Anuncio.query.all(), 
-    categorias = Categoria.query.all(), titulo="Anuncio")
-
-@app.route("/anuncio/vender")
-def vender():
-    return render_template('vender.html', anuncios = Anuncio.query.all(), 
-    categorias = Categoria.query.all(), titulo="Anuncio")
-
-@app.route("/anuncio/cadanuncio", methods=['POST'])
-def cadanuncio():
-    anuncio = Anuncio(request.form.get('titulo'), request.form.get('descricao'),
-    request.form.get('valor'),request.form.get('qtde'),request.form.get('oferta'),
-    request.form.get('categoria_id'), request.form.get('usuario_id'))
-    db.session.add(anuncio)
-    db.session.commit()
-    return redirect(url_for('anuncio'))
-
-@app.route("/anuncio/detalhar/<int:id>")
-def buscaranuncio(id):
-    anuncio = Anuncio.query.get(id)
-    return anuncio.titulo
-
-@app.route("/anuncio/editar/<int:id>", methods=['GET','POST'])
-def editaranuncio(id):
-    anuncio = Anuncio.query.get(id)
-    if request.method == 'POST':
-        anuncio.titulo = request.form.get('titulo')
-        anuncio.descricao = request.form.get('descricao')
-        anuncio.valor = request.form.get('valor')
-        anuncio.qtde = request.form.get('qtde')
-        anuncio.oferta = request.form.get('oferta')
-        anuncio.categoria = request.form.get('categoria_id')
-        db.session.add(anuncio)
-        db.session.commit()
-        return redirect(url_for('anuncio'))
-
-    return render_template('editanuncio.html', anuncio = anuncio, titulo="Alterar")
-
-@app.route("/anuncio/deletar/<int:id>")
-def deletaranuncio(id):
-    anuncio = Anuncio.query.get(id)
-    db.session.delete(anuncio)
-    db.session.commit()
-    return redirect(url_for('anuncio'))
-    
-# - - - - - - - - A N Ú N C I O S   P E R G U N T A S - - - - - - - - -
-
-@app.route("/anuncio/perguntar")
-def perguntar():
-    return render_template('perguntar.html', titulo="perguntar", 
-    perguntas = Pergunta.query.all())
-
-@app.route("/anuncio/cadpergunta", methods=['POST'])
-def cadpergunta(id):
-    pergunta = Anuncio(request.form.get('pergunta'))
-    db.session.add(pergunta)
-    db.session.commit()
-    return redirect(url_for('pergunta'))
-
-
-#- - - - - - - - F A V O R I T O S - - - - - - - - -
-
-@app.route("/anuncio/favoritos")
-def favoritos():
-    return render_template('favoritos.html')
-
-
-
-@app.route("/ofertas")
-def ofertas():
-    return render_template("ofertas.html", titulo="Ofertas", anuncios = Anuncio.query.all(), 
-    categorias = Categoria.query.all(),)
-
-
-# - - - - - - - CATEGORIAS - - - - - - -  
-
+# CATEGORIAS
 @app.route("/config")
-def config():
-    return render_template('config.html', titulo="Configurações")
+def config(): return render_template("config.html", titulo="Configurações")
 
 @app.route("/config/categorias")
-def categorias():
-    return render_template('categorias.html', categorias = Categoria.query.all(), 
-    titulo='Categoria')
+def categorias(): return render_template("categorias.html", categorias=Categoria.query.order_by(Categoria.id.desc()).all(), titulo="Categorias")
 
-@app.route("/config/cadcategorias", methods=['POST'])
+@app.post("/config/cadcategorias")
 def cadcategorias():
-    categoria = Categoria(request.form.get('descricao'))
-    db.session.add(categoria)
-    db.session.commit()
-    return redirect(url_for('categorias'))
+    db.session.add(Categoria(request.form.get("descricao"))); db.session.commit(); flash("Categoria cadastrada com sucesso.")
+    return redirect(url_for("categorias"))
+
+@app.route("/config/editar/<int:id>", methods=["GET","POST"])
+def editarcategoria(id):
+    obj=Categoria.query.get_or_404(id)
+    if request.method=="POST": obj.descricao=request.form.get("descricao"); db.session.commit(); flash("Categoria alterada com sucesso."); return redirect(url_for("categorias"))
+    return render_template("editcategoria.html", categoria=obj, titulo="Alterar categoria")
+
+@app.post("/config/deletar/<int:id>")
+def deletarcategoria(id):
+    db.session.delete(Categoria.query.get_or_404(id)); db.session.commit(); flash("Categoria excluída com sucesso."); return redirect(url_for("categorias"))
 
 @app.route("/config/detalhar/<int:id>")
 def buscarcategoria(id):
-    categoria = Categoria.query.get(id)
-    return categoria.descricao
+    obj=Categoria.query.get_or_404(id); return render_template("crud_detalhe.html", titulo="Detalhar categoria", entidade="Categoria", campos=[("ID",obj.id),("Descrição",obj.descricao)])
 
-@app.route("/config/editar/<int:id>", methods=['GET','POST'])
-def editarcategoria(id):
-    categoria = Categoria.query.get(id)
-    if request.method == 'POST':
-        categoria.descricao = request.form.get('descricao')
-        db.session.add(categoria)
-        db.session.commit()
-        return redirect(url_for('categorias'))
+# ANUNCIOS
+@app.route("/anuncio")
+def anuncio(): return render_template("anuncio.html", anuncios=Anuncio.query.order_by(Anuncio.id.desc()).all(), categorias=Categoria.query.all(), titulo="Anúncios")
 
-    return render_template('editcategoria.html', categoria = categoria, titulo="Categorias")
+@app.post("/anuncio/cadanuncio")
+def cadanuncio():
+    obj=Anuncio(titulo=request.form.get("titulo"), descricao=request.form.get("descricao"), valor=float(request.form.get("valor") or 0), qtde=int(request.form.get("qtde") or 0), oferta=request.form.get("oferta"), categoria_id=request.form.get("categoria_id"), usuario_id=request.form.get("usuario_id")); db.session.add(obj); db.session.commit(); flash("Anúncio cadastrado com sucesso."); return redirect(url_for("anuncio"))
 
-@app.route("/config/deletar/<int:id>")
-def deletarcategoria(id):
-    categoria = Categoria.query.get(id)
-    db.session.delete(categoria)
-    db.session.commit()
-    return redirect(url_for('categorias'))
+@app.route("/anuncio/editar/<int:id>", methods=["GET","POST"])
+def editaranuncio(id):
+    obj=Anuncio.query.get_or_404(id)
+    if request.method=="POST":
+        obj.titulo=request.form.get("titulo"); obj.descricao=request.form.get("descricao"); obj.valor=float(request.form.get("valor") or 0); obj.qtde=int(request.form.get("qtde") or 0); obj.oferta=request.form.get("oferta"); obj.categoria_id=request.form.get("categoria_id"); obj.usuario_id=request.form.get("usuario_id"); db.session.commit(); flash("Anúncio alterado com sucesso."); return redirect(url_for("anuncio"))
+    return render_template("editanuncio.html", anuncio=obj, categorias=Categoria.query.all(), titulo="Alterar anúncio")
 
+@app.post("/anuncio/deletar/<int:id>")
+def deletaranuncio(id): db.session.delete(Anuncio.query.get_or_404(id)); db.session.commit(); flash("Anúncio excluído com sucesso."); return redirect(url_for("anuncio"))
 
-# - - - - - - R E L A T Ó R I O S - - - - - - -
+@app.route("/anuncio/detalhar/<int:id>")
+def buscaranuncio(id):
+    obj=Anuncio.query.get_or_404(id); return render_template("crud_detalhe.html", titulo="Detalhar anúncio", entidade="Anúncio", campos=[("ID",obj.id),("Título",obj.titulo),("Descrição",obj.descricao),("Valor",obj.valor),("Quantidade",obj.qtde),("Oferta",obj.oferta),("ID categoria",obj.categoria_id),("ID usuário",obj.usuario_id)])
 
+@app.route("/anuncio/comprar")
+def comprar(): return render_template("comprar.html", anuncios=Anuncio.query.all(), categorias=Categoria.query.all(), titulo="Comprar")
+@app.route("/anuncio/vender")
+def vender(): return render_template("vender.html", anuncios=Anuncio.query.all(), categorias=Categoria.query.all(), titulo="Vender")
+
+# PERGUNTAS
+@app.route("/anuncio/perguntar")
+def perguntas(): return render_template("perguntar.html", perguntas=Pergunta.query.order_by(Pergunta.id.desc()).all(), anuncios=Anuncio.query.all(), usuarios=Usuario.query.all(), titulo="Perguntas")
+@app.post("/anuncio/cadpergunta")
+def cadpergunta():
+    obj=Pergunta(pergunta=request.form.get("pergunta"), resposta=request.form.get("resposta"), anuncio_id=request.form.get("anuncio_id"), usuario_id=request.form.get("usuario_id")); db.session.add(obj); db.session.commit(); flash("Pergunta cadastrada com sucesso."); return redirect(url_for("perguntas"))
+@app.route("/anuncio/pergunta/editar/<int:id>", methods=["GET","POST"])
+def editarpergunta(id):
+    obj=Pergunta.query.get_or_404(id)
+    if request.method=="POST": obj.pergunta=request.form.get("pergunta"); obj.resposta=request.form.get("resposta"); obj.anuncio_id=request.form.get("anuncio_id"); obj.usuario_id=request.form.get("usuario_id"); db.session.commit(); flash("Pergunta alterada com sucesso."); return redirect(url_for("perguntas"))
+    return render_template("pergunta_form.html", pergunta=obj, anuncios=Anuncio.query.all(), usuarios=Usuario.query.all(), titulo="Alterar pergunta")
+@app.post("/anuncio/pergunta/deletar/<int:id>")
+def deletarpergunta(id): db.session.delete(Pergunta.query.get_or_404(id)); db.session.commit(); flash("Pergunta excluída com sucesso."); return redirect(url_for("perguntas"))
+
+# FAVORITOS
+@app.route("/anuncio/favoritos")
+def favoritos(): return render_template("favoritos.html", favoritos=Favorito.query.order_by(Favorito.id.desc()).all(), anuncios=Anuncio.query.all(), usuarios=Usuario.query.all(), titulo="Favoritos")
+@app.post("/anuncio/favoritos/criar")
+def criarfavorito():
+    db.session.add(Favorito(anuncio_id=request.form.get("anuncio_id"), usuario_id=request.form.get("usuario_id"))); db.session.commit(); flash("Favorito cadastrado com sucesso."); return redirect(url_for("favoritos"))
+@app.route("/anuncio/favoritos/editar/<int:id>", methods=["GET","POST"])
+def editarfavorito(id):
+    obj=Favorito.query.get_or_404(id)
+    if request.method=="POST": obj.anuncio_id=request.form.get("anuncio_id"); obj.usuario_id=request.form.get("usuario_id"); db.session.commit(); flash("Favorito alterado com sucesso."); return redirect(url_for("favoritos"))
+    return render_template("favorito_form.html", favorito=obj, anuncios=Anuncio.query.all(), usuarios=Usuario.query.all(), titulo="Alterar favorito")
+@app.post("/anuncio/favoritos/deletar/<int:id>")
+def deletarfavorito(id): db.session.delete(Favorito.query.get_or_404(id)); db.session.commit(); flash("Favorito excluído com sucesso."); return redirect(url_for("favoritos"))
+
+# COMPRAS
+@app.route("/compras")
+def compras(): return render_template("compras.html", compras=Compra.query.order_by(Compra.id.desc()).all(), anuncios=Anuncio.query.all(), usuarios=Usuario.query.all(), titulo="Compras")
+@app.post("/compras/criar")
+def criarcompra():
+    qtde=int(request.form.get("qtde") or 0); valor=float(request.form.get("valor") or 0); total=float(request.form.get("total") or qtde*valor); db.session.add(Compra(qtde,valor,total,request.form.get("anuncio_id"),request.form.get("usuario_id"))); db.session.commit(); flash("Compra cadastrada com sucesso."); return redirect(url_for("compras"))
+@app.route("/compras/editar/<int:id>", methods=["GET","POST"])
+def editarcompra(id):
+    obj=Compra.query.get_or_404(id)
+    if request.method=="POST": obj.qtde=int(request.form.get("qtde") or 0); obj.valor=float(request.form.get("valor") or 0); obj.total=float(request.form.get("total") or obj.qtde*obj.valor); obj.anuncio_id=request.form.get("anuncio_id"); obj.usuario_id=request.form.get("usuario_id"); db.session.commit(); flash("Compra alterada com sucesso."); return redirect(url_for("compras"))
+    return render_template("compra_form.html", compra=obj, anuncios=Anuncio.query.all(), usuarios=Usuario.query.all(), titulo="Alterar compra")
+@app.post("/compras/deletar/<int:id>")
+def deletarcompra(id): db.session.delete(Compra.query.get_or_404(id)); db.session.commit(); flash("Compra excluída com sucesso."); return redirect(url_for("compras"))
+
+# OUTRAS PAGINAS
+@app.route("/ofertas")
+def ofertas(): return render_template("ofertas.html", titulo="Ofertas", anuncios=Anuncio.query.all(), categorias=Categoria.query.all())
 @app.route("/relatorios")
-def relatorios():
-    return render_template('relatorios.html')
-
+def relatorios(): return render_template("relatorios.html")
 @app.route("/relatorios/vendas")
-def relVendas():
-    return render_template('relvendas.html', titulo="Relatório de vendas")
-
+def relVendas(): return render_template("relvendas.html", titulo="Relatório de vendas")
 @app.route("/relatorios/compras")
-def relCompras():
-    return render_template('relcompras.html', titulo="Relatório de compras")
-
+def relCompras(): return render_template("relcompras.html", titulo="Relatório de compras")
 @app.route("/cad/faleconosco")
-def faleconosco():
-    return render_template('faleconosco.html', titulo="Fale Conosco")
-
-@app.route("/cad/cadmsg", methods=['POST'])
-def cadmsg():
-    return request.form
-
+def faleconosco(): return render_template("faleconosco.html", titulo="Fale Conosco")
+@app.post("/cad/cadmsg")
+def cadmsg(): return request.form
 @app.route("/quemsomos")
-def quemsomos():
-    return render_template('quemsomos.html', titulo="Quem somos")
+def quemsomos(): return render_template("quemsomos.html", titulo="Quem somos")
 
-if __name__ == 'pegpag.py':
-    db.create_all()
+if __name__ == "__main__":
+    with app.app_context(): db.create_all()
+    app.run(debug=True)
